@@ -2,6 +2,7 @@ package cream.repository;
 
 import cream.util.Dao;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -111,6 +112,14 @@ public class OrderDao extends Dao<Order>{
 
 	@Override
 	public Order update(Order dto) {
+		try{
+			dcm.setAutoCommitFalse();
+			
+		}catch(SQLException e){
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}//end of catch block
+		
 		try(PreparedStatement statement = dcm.getPrepareStatement(UPDATE)){
 			statement.setLong(2, dto.getCartId());
 			statement.setLong(1, dto.getProductId());
@@ -119,15 +128,38 @@ public class OrderDao extends Dao<Order>{
 			statement.setLong(5, dto.getOrderId());
 					
 			statement.execute();
+			dcm.commit();
 		}catch(SQLException e){
+			try{
+				dcm.rollback();
+			}catch(SQLException sqle){
+				sqle.printStackTrace();
+				throw new RuntimeException(sqle);
+			}//end of catch block
+			
 			e.printStackTrace();
 			throw new RuntimeException(e);
-		}
+		}finally {
+			try {
+				dcm.closeConnection();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}//end of catch block
+		}//end of finally block 
 		return null;
 	}
 
 	@Override
 	public Order create(Order dto) {
+		try{
+			dcm.setAutoCommitFalse();
+			
+		}catch(SQLException e){
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}//end of catch block
+		
 		try(PreparedStatement statement = dcm.getPrepareStatement(INSERT)){
 			statement.setLong(1, dto.getProductId());
 			statement.setLong(2, dto.getQty());
@@ -135,24 +167,63 @@ public class OrderDao extends Dao<Order>{
 			statement.setInt(4, dto.getShipped());
 			
 			statement.execute();
+			dcm.commit();
 		}catch(SQLException e){
+			try{
+			dcm.rollback();
+			}catch(SQLException sqle){
+				sqle.printStackTrace();
+				throw new RuntimeException(sqle);
+			}//end of catch block 
+			
 			e.printStackTrace();
 			throw new RuntimeException(e);
-		}
+		}finally {
+			try {
+				dcm.closeConnection();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}//end of catch block
+		}//end of finally block 
 		return null;
 	}
 
 	@Override
 	public void delete(long id) {
-		try(PreparedStatement statement = dcm.getPrepareStatement(DELETE)){
-			statement.setLong(1,id);
-			statement.execute();
+		try{
+			dcm.setAutoCommitFalse();
 			
 		}catch(SQLException e){
 			e.printStackTrace();
 			throw new RuntimeException(e);
+		}//end of catch block
+		
+		try(PreparedStatement statement = dcm.getPrepareStatement(DELETE)){
+			statement.setLong(1,id);
+			statement.execute();
+			dcm.commit();
 			
-		}
+		}catch(SQLException e){
+			try{
+				dcm.rollback();
+			}catch(SQLException sqle){
+				sqle.printStackTrace();
+				throw new RuntimeException(sqle);
+			}//end of catch block 
+			
+			e.printStackTrace();
+			throw new RuntimeException(e);
+			
+		}finally {
+			try {
+				dcm.closeConnection();
+
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}//end of catch block
+		}//end of finally block 
 		
 	}
 

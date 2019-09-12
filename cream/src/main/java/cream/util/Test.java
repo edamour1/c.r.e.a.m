@@ -31,14 +31,9 @@ import cream.repository.UserDao;
 public class Test {
 	public static void main(String args[]) throws SQLException {
 		System.out.println("Monkey");
-		CartDao orderDao = new CartDao();
-		List<Cart> orderList = orderDao.getdAllCartsInRange(3, 0);
-		
-		for(Cart cart: orderList) {
-			
-			System.out.println(cart.getCartId());
-		}
-		
+	UserDao userDao = new UserDao();
+
+		System.out.println(userDao.usernameExist("Twan"));
 		System.out.println("Jewish");
 	}
 

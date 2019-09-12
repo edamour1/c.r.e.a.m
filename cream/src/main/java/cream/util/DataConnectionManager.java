@@ -17,6 +17,7 @@ public class DataConnectionManager {
 	
 	public DataConnectionManager() throws SQLException {
 		try{//initialize Connection and Statement objects
+		Class.forName("oracle.jdbc.OracleDriver");
 		myConnection = DriverManager.getConnection(
 				"jdbc:oracle:thin:@192.168.56.105:1521:xe",
 				"cream",
@@ -26,6 +27,10 @@ public class DataConnectionManager {
 		}catch(SQLException ex){
 			ex.getMessage();
 		}//end of catch block
+ catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}//end of constructor method
 	
@@ -52,6 +57,20 @@ public class DataConnectionManager {
 		myStatement.close();
 	}
 	
+	public Connection getMyConnection() {
+		return myConnection;
+	}
 	
+	public void setAutoCommitFalse() throws SQLException {
+		myConnection.setAutoCommit(false);
+	}
+	
+	public void commit() throws SQLException {
+		myConnection.commit();
+	}
+	
+	public void rollback() throws SQLException {
+		myConnection.rollback();
+	}
 	
 }//end of DataConnectionManager class 

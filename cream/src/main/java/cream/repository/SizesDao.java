@@ -1,5 +1,6 @@
 package cream.repository;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -81,41 +82,111 @@ public class SizesDao extends Dao<SizeS>{
 
 	@Override
 	public SizeS update(SizeS dto) {
+		try{
+			dcm.setAutoCommitFalse();
+			
+		}catch(SQLException e){
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}//end of catch block
+		
 		try(PreparedStatement statement = dcm.getPrepareStatement(UPDATE)){
 			statement.setLong(2, dto.getSizeId());
 			statement.setString(1, dto.getSizeName());
 			statement.execute();
+			dcm.commit();
 		}catch(SQLException e){
+			try{
+				dcm.rollback();
+			}catch(SQLException sqle){
+				sqle.printStackTrace();
+				throw new RuntimeException(sqle);
+			}//end of catch block 
+			
 			e.printStackTrace();
 			throw new RuntimeException(e);
-		}
+		}finally {
+			try {
+				dcm.closeConnection();
+
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}//end of catch block
+		}//end of finally block 
 		return null;
 	}
 
 	@Override
 	public SizeS create(SizeS dto){
+		try{
+			dcm.setAutoCommitFalse();
+			
+		}catch(SQLException e){
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}//end of catch block
+		
 		try(PreparedStatement statement = dcm.getPrepareStatement(INSERT)){
 			statement.setString(1, dto.getSizeName());
 			
 			statement.execute();
+			dcm.commit();
 		}catch(SQLException e){
+			try{
+				dcm.rollback();
+			}catch(SQLException sqle){
+				sqle.printStackTrace();
+				throw new RuntimeException(sqle);
+			}//end of catch block 
+			
 			e.printStackTrace();
 			throw new RuntimeException(e);
-		}
+		}finally {
+			try {
+				dcm.closeConnection();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}//end of catch block
+		}//end of finally block 
 		return null;
 	}
 
 	@Override
 	public void delete(long id) {
-		try(PreparedStatement statement = dcm.getPrepareStatement(DELETE)){
-			statement.setLong(1,id);
-			statement.execute();
+		try{
+			dcm.setAutoCommitFalse();
 			
 		}catch(SQLException e){
 			e.printStackTrace();
 			throw new RuntimeException(e);
+		}//end of catch block
+		
+		try(PreparedStatement statement = dcm.getPrepareStatement(DELETE)){
+			statement.setLong(1,id);
+			statement.execute();
+			dcm.commit();
 			
-		}
+		}catch(SQLException e){
+			try{
+				dcm.rollback();
+			}catch(SQLException sqle){
+				sqle.printStackTrace();
+				throw new RuntimeException(sqle);
+			}//end of catch block 
+			
+			e.printStackTrace();
+			throw new RuntimeException(e);
+			
+		}finally {
+			try {
+				dcm.closeConnection();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}//end of catch block
+		}//end of finally block 
 	}
 
 	@Override

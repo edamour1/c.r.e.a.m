@@ -57,10 +57,10 @@ public class UserDao extends Dao<User>{
 	
 	private static final String GET_ALL_USERS_IN_RANGE = "SELECT * FROM User_\n" + 
 			"WHERE user_id BETWEEN ? AND ?";
-
-	public UserDao() throws SQLException {
-		super();
-	}
+	
+	private static final String GET_USER = "SELECT username FROM user_\n" + 
+			"\n" + 
+			"WHERE username= ?";
 	
 	private static final String MAX_ID  = "SELECT max(user_id) AS Largest\n" + 
 			"FROM user_";
@@ -68,6 +68,9 @@ public class UserDao extends Dao<User>{
 	private static final String MIN_ID = "SELECT min(user_id) AS Smallest\n" + 
 			"FROM user_";
 
+	public UserDao() throws SQLException {
+		super();
+	}
 
 	@Override
 	public User findById(long id) {
@@ -99,6 +102,7 @@ public class UserDao extends Dao<User>{
 	public User login(String username, String password) throws SQLException {
 		try(PreparedStatement statement = dcm.getPrepareStatement(LOGIN)){
 			User user = new User();
+		
 			statement.setString(1, username);
 			statement.setString(2, password);
 			
@@ -114,9 +118,9 @@ public class UserDao extends Dao<User>{
 				user.setUserName(rs.getString("username"));
 				user.setPassword(rs.getString("password_"));
 			}//end of while loop
-
-			return user;
-
+				
+					return user;
+				
 		}catch(SQLException e){
 			e.printStackTrace();
 			throw new RuntimeException(e);
@@ -158,6 +162,16 @@ public class UserDao extends Dao<User>{
 
 	@Override
 	public User update(User dto) {
+
+		try{
+			dcm.setAutoCommitFalse();
+			
+		}catch(SQLException e){
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}//end of catch block 
+		
+		
 		try(PreparedStatement statement = dcm.getPrepareStatement(UPDATE)){
 			statement.setLong(8, dto.getUserId());
 			statement.setString(1, dto.getFirstName());
@@ -168,15 +182,37 @@ public class UserDao extends Dao<User>{
 			statement.setString(6, dto.getUserName());
 			statement.setString(7, dto.getPassword());
 			statement.execute();
+			dcm.commit();
 		}catch(SQLException e){
+			try{
+				dcm.rollback();
+			}catch(SQLException sqle){
+				sqle.printStackTrace();
+				throw new RuntimeException(sqle);
+			}//end of catch block 
 			e.printStackTrace();
 			throw new RuntimeException(e);
-		}
+		}finally {
+			try {
+				dcm.closeConnection();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}//end of catch block
+		}//end of finally block 
 		return null;
 	}
 
 	@Override
 	public User create(User dto) {
+		try{
+			dcm.setAutoCommitFalse();
+			
+		}catch(SQLException e){
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}//end of catch block
+	
 		try(PreparedStatement statement = dcm.getPrepareStatement(INSERT)){
 			statement.setString(1, dto.getFirstName());
 			statement.setString(2, dto.getLastName());
@@ -186,25 +222,64 @@ public class UserDao extends Dao<User>{
 			statement.setString(6, dto.getUserName());
 			statement.setString(7, dto.getPassword());
 			statement.execute();
+			dcm.commit();
 		}catch(SQLException e){
+			try{
+				dcm.rollback();
+			}catch(SQLException sqle){
+				sqle.printStackTrace();
+				throw new RuntimeException(sqle);
+			}//end of catch block 
+	
 			e.printStackTrace();
 			throw new RuntimeException(e);
-		}
+		}finally {
+			try {
+				dcm.closeConnection();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}//end of catch block
+		}//end of finally block 
 		return null;
 	}
 
 	@Override
 	public void delete(long id) {
-		try(PreparedStatement statement = dcm.getPrepareStatement(DELETE)){
-			System.out.println(id);
-			statement.setLong(1,id);
-			statement.execute();
+		try{
+			dcm.setAutoCommitFalse();
 			
 		}catch(SQLException e){
 			e.printStackTrace();
 			throw new RuntimeException(e);
+		}//end of catch block
+		
+		try(PreparedStatement statement = dcm.getPrepareStatement(DELETE)){
+			statement.setLong(1,id);
+			statement.execute();
+			dcm.commit();
 			
-		}
+		}catch(SQLException e){
+			try{
+				dcm.rollback();
+				
+			}catch(SQLException sqle){
+				sqle.printStackTrace();
+				throw new RuntimeException(sqle);
+			}//end of catch block 
+			
+			e.printStackTrace();
+			throw new RuntimeException(e);
+			
+		}finally {
+			try {
+				dcm.closeConnection();
+	
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}//end of catch block
+		}//end of finally block 
 		
 	}
 
@@ -275,6 +350,26 @@ public class UserDao extends Dao<User>{
 		}//end of catch block 
 	}
 
+	public boolean usernameExist(String username) {
+		try(PreparedStatement statement = dcm.getPrepareStatement(GET_USER)){
+		
+			statement.setString(1, username);
+		
+			ResultSet rs = statement.executeQuery();
+			
+			while(rs.next()) {
+				return true;
+			}//end of while loop
 
+		
+
+		}catch(SQLException e){
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}//end of catch block 
+
+		
+		return false;
+	}
 
 }//end of UserDao class
